@@ -32,7 +32,7 @@ public:
         validateSeats();
          }
          catch (const std::exception& e) {
-           std::cerr << "Error in Event Location constructor: " << e.what() << endl;
+           cout << "Error in Event Location constructor: " << e.what() << endl;
        }
 
     }
@@ -114,15 +114,18 @@ public:
        
     }
     //operators
-    void operator=(EventLocation source) {
+    EventLocation& operator=(const EventLocation& source) {
+        if (this != &source) {
         this->maxSeats = source.maxSeats;
         this->numRows = source.numRows;
-
-        delete[]this->seatsPerRow;
-        this->seatsPerRow = new int[this->numRows];
-        for (int i = 0; i < this->numRows; i++)
-            this->seatsPerRow[i] = source.seatsPerRow[i];
-
+        if (this->seatsPerRow != NULL) {
+            delete[]this->seatsPerRow;
+            this->seatsPerRow = new int[this->numRows];
+            for (int i = 0; i < this->numRows; i++)
+                this->seatsPerRow[i] = source.seatsPerRow[i];
+        }
+    }
+        return *this;
     }
     
     void printInfo() const {
@@ -240,11 +243,18 @@ istream& operator >>(istream& f, EventLocation& loc)
             this->time = time;
         }
         //operators
-        void operator=(Event source) {
+        Event& operator=(const Event& source) {
+            if (this != &source) {
+                if (this->name != NULL) {
+                    delete[] this->name;
+                    this->name = NULL;
+                }
             this->name = new char[strlen(source.name) + 1];
             strcpy_s(this->name, strlen(source.name) + 1, source.name);
             this->date = source.date;
             this->time = source.time;
+        }
+            return*this;
         }
         void printInfo() const {
             cout << "Event Information:" << endl;
@@ -356,8 +366,6 @@ istream& operator >>(istream& f, EventLocation& loc)
         //operators
         Ticket& operator=(const Ticket& source) {
             if (this != &source){
-
-                // Copy the type
                 this->type = source.type;
             if (this->ticketId != NULL) {
                 delete[] this->ticketId;
@@ -374,16 +382,16 @@ istream& operator >>(istream& f, EventLocation& loc)
                 return ticketId;
          }
         
-       /* void printInfo() const {
+       void printInfo() const {
             cout << "Ticket Information:" << endl;
             cout << "Type: " << type << endl;
             cout << "Ticket ID: " << ticketId << endl;
             cout << "Next ID: " << nextId << endl;
             cout << "-----------------------------" << endl;
 
-        }*/
+        }
     };
-    istream& operator >>(istream& f, Ticket& tic)
+   /* istream& operator >>(istream& f, Ticket& tic)
     {
         cout << "The type of the seat: ";
         f >> tic.type;
@@ -401,9 +409,9 @@ istream& operator >>(istream& f, EventLocation& loc)
         g << "Id:" << tic.ticketId;
         g << "-----------------------------" << endl;
         return g;
-    }
+    }*/
 
-   int Ticket::nextId = 1;  // Initialize static member
+   int Ticket::nextId = 1; 
 
     int main() {
        
