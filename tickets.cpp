@@ -11,8 +11,6 @@ class EventLocation {
       friend ostream& operator<<(ostream& g,  EventLocation loc);
       friend istream& operator >>(istream& f, EventLocation& loc);
 
-
-
 public:
     EventLocation() {
        this->maxSeats = 0;
@@ -127,7 +125,67 @@ public:
     }
         return *this;
     }
+    bool operator!()
+    {
+        int sum = 0;
+        
+        for (int i = 0; i < numRows; i++)
+            sum += seatsPerRow[i];
+          if(maxSeats>=sum)
+            return true;
+        
+        return false;
+    }
+    friend bool operator<(int o, const EventLocation& loc)
+    {
+        return o < loc.maxSeats;
+    }
+    int operator [](int i)
+    {
+        if (i<0 || i>this->numRows)
+            throw exception("Out of range");
+        else
+            return this->seatsPerRow[i];
+    }
+
     
+    EventLocation operator++()
+    {
+        this->numRows++;
+        return *this;
+    }
+
+   EventLocation operator++(int i)
+    {
+        EventLocation copie = *this;
+        this->numRows += i;
+        return copie;
+    }
+
+  
+    EventLocation operator+(int valoare)
+    {
+        EventLocation copie = *this;
+        copie.numRows += valoare;
+        return copie;
+    }
+
+
+
+    bool operator ==(const EventLocation& loc)
+    {
+        EventLocation sem(*this);
+        if (sem.maxSeats== loc.maxSeats &&
+            sem.numRows == loc.numRows)
+        {
+            for (int i = 0; i < sem.numRows; i++)
+                if (sem.seatsPerRow[i] != loc.seatsPerRow[i])
+                    return false;
+            return true;
+        }
+        return false;
+    }
+
     void printInfo() const {
         cout << "Event Location Information:" << endl;
         cout << "Max Seats: " << maxSeats << endl;
@@ -376,6 +434,7 @@ istream& operator >>(istream& f, EventLocation& loc)
             }
             return *this;
         }
+
         int* generateTicketId() {
             delete[] this->ticketId;
                 ticketId = new int(nextId++);
@@ -391,15 +450,13 @@ istream& operator >>(istream& f, EventLocation& loc)
 
         }
     };
-   /* istream& operator >>(istream& f, Ticket& tic)
+    /*istream& operator >>(istream& f, Ticket& tic)
     {
         cout << "The type of the seat: ";
         f >> tic.type;
         cout << endl;
        
-
-
-
+       tic.generateTicketId();
         return f;
     }
     ostream& operator<<(ostream& g, Ticket tic) {
@@ -422,13 +479,13 @@ istream& operator >>(istream& f, EventLocation& loc)
         //cin >> event;
         //cout << event;
         Ticket bilet;
-        cin >> bilet;
-        cout << bilet;
+       // cin >> bilet;
+       // cout << bilet;
         
         Ticket bilet1("Regular");
         //location.printInfo();
         //event.printInfo();
-        //bilet.printInfo();
+       bilet.printInfo();
       //  bilet1.printInfo();
 
         return 0;
