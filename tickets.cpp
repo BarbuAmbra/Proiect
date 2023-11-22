@@ -83,7 +83,8 @@ public:
         this->numRows = numRows;
     }
 
-    const int* getSeatsPerRow() const {
+     int* getSeatsPerRow() const {
+
         int* seatsCopy = new int[numRows];
         for (int i = 0; i < numRows; ++i) {
             seatsCopy[i] = seatsPerRow[i];
@@ -91,11 +92,18 @@ public:
         return seatsCopy;
     }
 
-    void setSeatsPerRow(const int* newSeatsPerRow) {
-        delete[] seatsPerRow;
-        seatsPerRow = new int[numRows];
-        for (int i = 0; i < numRows; ++i) {
-            this->seatsPerRow[i] = newSeatsPerRow[i];
+    void setSeatsPerRow(int* newSeatsPerRow, int newRows) {
+        if (newSeatsPerRow != nullptr && newRows > 0) {
+            delete[] this->seatsPerRow;
+            this->numRows = newRows;
+            this->seatsPerRow = new int[numRows];
+            for (int i = 0; i < numRows; ++i) {
+                this->seatsPerRow[i] = newSeatsPerRow[i];
+            }
+        }
+        else {
+            this->seatsPerRow = nullptr;
+            this->numRows = 0;
         }
     }
     void validateSeats() const {
@@ -314,6 +322,7 @@ istream& operator >>(istream& f, EventLocation& loc)
         }
             return*this;
         }
+
         void printInfo() const {
             cout << "Event Information:" << endl;
             cout << "Name: " << name << endl;
