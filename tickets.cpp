@@ -326,7 +326,6 @@ istream& operator >>(istream& f, EventLocation& loc)
             return (strcmp(name, eve.name) > 0);
         }
         bool operator!() const {
-            // Define the logic for negation based on time
             return time.empty();
         }
   
@@ -452,6 +451,7 @@ istream& operator >>(istream& f, EventLocation& loc)
             return nextId;
         }
         friend void setNextId(int NextId);
+        //operators
         Ticket& operator=(const Ticket& source) {
             if (this != &source){
                 this->type = source.type;
@@ -465,14 +465,13 @@ istream& operator >>(istream& f, EventLocation& loc)
             return *this;
         }
         bool operator!() const {
-            // Define the logic for negation based on whether the ticket type is empty
             return type.empty();
         }
-        bool operator==(const Ticket& other) const {
-            return type == other.type && *ticketId == *other.ticketId;
+        bool operator==(const Ticket& tic) const {
+            return type == tic.type && *ticketId == *tic.ticketId;
         }
-        bool operator>(const Ticket& other) const {
-            return *ticketId > *other.ticketId;
+        bool operator>(const Ticket& tic) const {
+            return *ticketId > *tic.ticketId;
         }
         Ticket& operator++() {
             ++(*ticketId);
