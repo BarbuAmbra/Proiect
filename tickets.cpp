@@ -29,7 +29,7 @@ public:
 
         validateSeats();
          }
-         catch (const std::exception& e) {
+         catch (const exception& e) {
            cout << "Error in Event Location constructor: " << e.what() << endl;
        }
 
@@ -322,6 +322,28 @@ istream& operator >>(istream& f, EventLocation& loc)
         }
             return*this;
         }
+        bool operator>(const Event& eve) const {
+            return (strcmp(name, eve.name) > 0);
+        }
+        bool operator!() const {
+            // Define the logic for negation based on time
+            return time.empty();
+        }
+  
+        Event operator+(const Event& eve) const {
+            char* concatenatedName = new char[strlen(name) + strlen(eve.name) + 1];
+            strcpy_s(concatenatedName, strlen(name) + 1, name);
+            strcat_s(concatenatedName, strlen(name) + strlen(eve.name) + 1, eve.name);
+
+            Event result(concatenatedName, date, time);
+            delete[] concatenatedName;
+
+            return result;
+        }
+        
+        bool operator==(const Event& eve) const {
+            return (strcmp(name, eve.name) == 0);
+        }
 
         void printInfo() const {
             cout << "Event Information:" << endl;
@@ -430,7 +452,6 @@ istream& operator >>(istream& f, EventLocation& loc)
             return nextId;
         }
         friend void setNextId(int NextId);
-        //operators
         Ticket& operator=(const Ticket& source) {
             if (this != &source){
                 this->type = source.type;
@@ -442,6 +463,26 @@ istream& operator >>(istream& f, EventLocation& loc)
                 this->nextId = source.nextId;
             }
             return *this;
+        }
+        bool operator!() const {
+            // Define the logic for negation based on whether the ticket type is empty
+            return type.empty();
+        }
+        bool operator==(const Ticket& other) const {
+            return type == other.type && *ticketId == *other.ticketId;
+        }
+        bool operator>(const Ticket& other) const {
+            return *ticketId > *other.ticketId;
+        }
+        Ticket& operator++() {
+            ++(*ticketId);
+            return *this;
+        }
+
+        Ticket operator++(int) {
+            Ticket temp(*this);
+            ++(*ticketId);
+            return temp;
         }
 
         int* generateTicketId() {
@@ -459,12 +500,14 @@ istream& operator >>(istream& f, EventLocation& loc)
 
         }
     };
-    /*istream& operator >>(istream& f, Ticket& tic)
+    istream& operator >>(istream& f, Ticket& tic)
     {
+        char* tm = new char[256];
         cout << "The type of the seat: ";
-        f >> tic.type;
-        cout << endl;
-       
+        f.getline(tm, 256);
+        tic.setType(tm);
+        cout << "Ticket id";
+        f.getline(tm, 256);
        tic.generateTicketId();
         return f;
     }
@@ -475,7 +518,7 @@ istream& operator >>(istream& f, EventLocation& loc)
         g << "Id:" << tic.ticketId;
         g << "-----------------------------" << endl;
         return g;
-    }*/
+    }
 
    int Ticket::nextId = 1; 
 
