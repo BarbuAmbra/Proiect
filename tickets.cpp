@@ -5,20 +5,35 @@
 #include<fstream>
 using namespace std;
 
-class EventLocation {
+
+
+class Abstract {
+public:
+    virtual void readFromFile(istream& file) = 0;
+
+};
+
+
+class EventLocation: public Abstract {
     int maxSeats;
     int numRows;
     int* seatsPerRow;
+
+
 
     friend ostream& operator<<(ostream& g, EventLocation loc);
     friend istream& operator >>(istream& f, EventLocation& loc);
 
 public:
+
     EventLocation() {
         this->maxSeats = 0;
         this->numRows = 0;
         this->seatsPerRow = 0;
     }
+
+
+
     EventLocation(int maxSeats, int numRows, const int* seatsPerRow)
     {
         try {
@@ -36,6 +51,9 @@ public:
         }
 
     }
+
+
+
     EventLocation(const EventLocation& c)
     {
         this->maxSeats = c.maxSeats;
@@ -48,6 +66,9 @@ public:
         }
 
     }
+
+
+
     EventLocation(const int* seatsPerRow)
     {
         this->maxSeats = maxSeats;
@@ -67,6 +88,8 @@ public:
         return maxSeats;
     }
 
+
+
     void setMaxSeats(int maxSeats) {
         if (maxSeats < 0) {
             throw invalid_argument("Max seats must be positive.");
@@ -74,9 +97,13 @@ public:
         this->maxSeats = maxSeats;
     }
 
+
+
     int getNumRows() const {
         return numRows;
     }
+
+
 
     void setNumRows(int numRows) {
         if (numRows < 0) {
@@ -84,6 +111,8 @@ public:
         }
         this->numRows = numRows;
     }
+
+
 
     int* getSeatsPerRow() const {
 
@@ -93,6 +122,8 @@ public:
         }
         return seatsCopy;
     }
+
+
 
     void setSeatsPerRow(int* newSeatsPerRow, int newRows) {
         if (newSeatsPerRow != nullptr && newRows > 0) {
@@ -108,6 +139,9 @@ public:
             this->numRows = 0;
         }
     }
+
+
+
     void validateSeats() const {
 
         int totalSeats = 0;
@@ -116,12 +150,38 @@ public:
         }
 
         if (totalSeats > maxSeats) {
-            throw std::exception("The product of seats per row and number of rows exceeds maxSeats.");
+            throw exception("The product of seats per row and number of rows exceeds maxSeats.");
         }
 
 
     }
+
+
+
+
+    void readFromFile(istream& file) override {
+        
+        file >> maxSeats;
+        file >> numRows;
+
+        seatsPerRow = new int[numRows];
+        for (int i = 0; i < numRows; ++i) {
+            file >> seatsPerRow[i];
+        }
+
+        validateSeats();
+
+    }
+
+
+    friend ostream& operator<<(ostream& g, EventLocation loc);
+    friend istream& operator >>(istream& f, EventLocation& loc);
+
+
+
+
     //operators
+
     EventLocation& operator=(const EventLocation& source) {
         if (this != &source) {
             this->maxSeats = source.maxSeats;
@@ -135,6 +195,9 @@ public:
         }
         return *this;
     }
+
+
+
     bool operator!()
     {
         int sum = 0;
@@ -146,10 +209,15 @@ public:
 
         return false;
     }
+
+
+
     friend bool operator<(int o, const EventLocation& loc)
     {
         return o < loc.maxSeats;
     }
+
+
     int operator [](int i)
     {
         if (i<0 || i>this->numRows)
@@ -158,6 +226,12 @@ public:
             return this->seatsPerRow[i];
     }
 
+
+    EventLocation operator--()
+    {
+        this->numRows--;
+        return *this;
+    }
 
     EventLocation operator++()
     {
@@ -191,15 +265,18 @@ public:
             for (int i = 0; i < sem.numRows; i++)
                 if (sem.seatsPerRow[i] != loc.seatsPerRow[i])
                     return false;
+
             return true;
         }
         return false;
     }
 
+
     void printInfo() const {
         cout << "Event Location Information:" << endl;
         cout << "Max Seats: " << maxSeats << endl;
         cout << "Num Rows: " << numRows << endl;
+
         cout << "Seats Per Row: ";
         for (int i = 0; i < numRows; ++i) {
             cout << seatsPerRow[i] << " ";
@@ -207,8 +284,12 @@ public:
         cout << endl;
         cout << "-----------------------------" << endl;
     }
+ 
+
 
 };
+
+
 
 ostream& operator<<(ostream& g, EventLocation loc) {
     g << "Event Location Information:" << endl;
@@ -222,35 +303,46 @@ ostream& operator<<(ostream& g, EventLocation loc) {
     g << "-----------------------------" << endl;
     return g;
 }
+
+
+
 istream& operator >>(istream& f, EventLocation& loc)
 {
     cout << "The number maxim of seats at the event is ";
     f >> loc.maxSeats;
     cout << endl;
+
     cout << "The number of rows is: ";
     f >> loc.numRows;
     cout << endl;
 
     cout << "The number of seats per row are: ";
+    loc.seatsPerRow = new int[loc.numRows];
     for (int i = 0; i < loc.numRows; i++)
     {
         f >> loc.seatsPerRow[i];
-        cout << endl;
     }
+    loc.validateSeats();
     return f;
 }
 
-class Event {
+
+
+
+class Event:public Abstract{
+
     char* name;
     string date;
     string time;
 
+    
     friend ostream& operator<<(ostream& g, Event eve);
     friend istream& operator >>(istream& f, Event& eve);
 
-
-
 public:
+
+
+
     Event() {
         this->name = new char[2];
         strcpy(this->name, " ");
@@ -310,7 +402,21 @@ public:
     void setTime(const string& time) {
         this->time = time;
     }
+    void readFromFile(istream& file) override {
+       
+        char buffer[100];
+        file.getline(buffer, sizeof(buffer));
+        name = new char[strlen(buffer) + 1];
+        strcpy(name, buffer);
+
+        file >> date;
+        file >> time;
+    }
+    friend ostream& operator<<(ostream& g, Event eve);
+    friend istream& operator >>(istream& f, Event& eve);
+
     //operators
+
     Event& operator=(const Event& source) {
         if (this != &source) {
             if (this->name != NULL) {
@@ -324,12 +430,18 @@ public:
         }
         return*this;
     }
+
+
     bool operator>(const Event& eve) const {
         return (strcmp(name, eve.name) > 0);
     }
+
+
+
     bool operator!() const {
         return time.empty();
     }
+
 
     Event operator+(const Event& eve) const {
         char* concatenatedName = new char[strlen(name) + strlen(eve.name) + 1];
@@ -355,24 +467,39 @@ public:
 
 
     }
-    void saveToFile(ostream& outFile) const {
-        outFile.write(name, strlen(name) + 1);
-        outFile.write(reinterpret_cast<const char*>(&date), sizeof(string));
-        outFile.write(reinterpret_cast<const char*>(&time), sizeof(string));
-    }
-
-    
-    void loadFromFile(istream& inFile) {
-        char* buffer = new char[256];
-        inFile.read(buffer, 256);
-        name = new char[strlen(buffer) + 1];
-        strcpy(name, buffer);
-        delete[] buffer;
-
-        inFile.read(reinterpret_cast<char*>(&date), sizeof(string));
-        inFile.read(reinterpret_cast<char*>(&time), sizeof(string));
-    }
+ 
 };
+
+/* Ticket searchTicketById(const string& fileName, int targetId) {
+    ifstream inputFile(fileName, ios::binary);
+
+    if (!inputFile.is_open()) {
+        cerr << "Error opening " << fileName << " for reading" << endl;
+        // Return an empty Ticket object or throw an exception as needed
+        return Ticket();
+    }
+
+    Ticket foundTicket;
+
+    while (inputFile >> foundTicket) {
+        if (foundTicket.getTicketId() == targetId) {
+            // Ticket with the target ID found
+            cout << "Ticket found:" <<endl;
+            cout << foundTicket;
+            break;
+        }
+    }
+
+    inputFile.close();
+
+    // If the loop completes without finding the ticket, display a message
+    if (foundTicket.getTicketId() != targetId) {
+        cout << "Ticket with ID " << targetId << " not found." << endl;
+    }
+
+    return foundTicket;
+}*/
+
 ostream& operator<<(ostream& g, Event eve) {
     g << "Event Information:" << endl;
     g << "Name: " << eve.name << endl;
@@ -381,6 +508,9 @@ ostream& operator<<(ostream& g, Event eve) {
     g << "-----------------------------" << endl;
     return g;
 }
+
+
+
 istream& operator >>(istream& f, Event& eve)
 {
     cout << "The name of the event is: ";
@@ -398,10 +528,10 @@ istream& operator >>(istream& f, Event& eve)
     return f;
 }
 
+
 class Ticket {
     string type;
     int* ticketId;
-    static int nextId;
     double price;
     friend ostream& operator<<(ostream& g, Ticket eve);
     friend istream& operator >>(istream& f, Ticket& tic);
@@ -412,26 +542,26 @@ public:
         this->type = "unknown";
         this->ticketId = nullptr;
         this->price = 0.0;
-        generateTicketId();
+        
     }
 
 
-    Ticket(const string& type, double price) {
+    Ticket(const string& type,int* ticketId,double price) {
         this->type = type;
+        this->ticketId = ticketId;
         this->price = price;
-        generateTicketId();
+        
 
     }
     Ticket(const Ticket& c) {
         this->type = c.type;
-        generateTicketId();
+        this->ticketId = c.ticketId;
         this->price = c.price;
     }
     Ticket(const string& type) {
         this->type = type;
         this->ticketId = ticketId;
-        //this->nextId = nextId;
-        generateTicketId();
+        this->price = price;
 
     }
 
@@ -476,32 +606,39 @@ public:
 
     }
 
-    static int getNextId() {
-        return nextId;
-    }
-    friend void setNextId(int NextId);
-    //operators
-    Ticket& operator=(const Ticket& source) {
-        if (this != &source) {
-            this->type = source.type;
-            if (this->ticketId != NULL) {
-                delete[] this->ticketId;
-            }
-            this->ticketId = source.ticketId;
-
-            this->nextId = source.nextId;
-        }
-        return *this;
-    }
+    void saveToBinaryFile(const string& fileName) const;
     bool operator!() const {
         return type.empty();
     }
+    //operators
+
+
+    Ticket& operator=(const Ticket& source) {
+        if (this != &source) {
+            
+            this->type = source.type;
+
+            
+            if (source.ticketId != nullptr) {
+                this->ticketId = new int(*source.ticketId);
+            }
+            else {
+                this->ticketId = nullptr;
+            }
+            
+            this->price = source.price;
+        }
+        return *this;
+    }
+
     bool operator==(const Ticket& tic) const {
         return type == tic.type && *ticketId == *tic.ticketId;
     }
+
     bool operator>(const Ticket& tic) const {
         return *ticketId > *tic.ticketId;
     }
+
     Ticket& operator++() {
         ++(*ticketId);
         return *this;
@@ -514,9 +651,11 @@ public:
     }
 
     int* generateTicketId() {
-        this->ticketId = new int(nextId++);
+        int addvalue=1;
+        this->ticketId = new int(addvalue);
         return this->ticketId;
     }
+    
 
     void printInfo() const {
         cout << "Ticket Information:" << endl;
@@ -525,119 +664,206 @@ public:
         cout << "-----------------------------" << endl;
 
     }
-    void saveToFile(ostream& outFile) const {
-        outFile.write(type.c_str(), type.length() + 1);
-        outFile.write(reinterpret_cast<const char*>(&price), sizeof(double));
-        outFile.write(reinterpret_cast<const char*>(&(*ticketId)), sizeof(int));
-    }
+    friend ostream& operator<<(ostream& g, Ticket eve);
+    friend istream& operator >>(istream& f, Ticket& tic);
 
-    
-    void loadFromFile(istream& inFile) {
-        char* buffer = new char[256];
-        inFile.read(buffer, 256);
-        type = buffer;
-        delete[] buffer;
-
-        inFile.read(reinterpret_cast<char*>(&price), sizeof(double));
-        inFile.read(reinterpret_cast<char*>(&(*ticketId)), sizeof(int));
-    }
 };
-int Ticket::nextId = 0;
+void printBinaryFile(const string& fileName) {
+    ifstream fisierbinar(fileName, ios::binary);
 
+    if (fisierbinar.is_open()) {
+        while (!fisierbinar.eof()) {
+
+
+            int typeSize;
+            fisierbinar.read(reinterpret_cast<char*>(&typeSize), sizeof(int));
+
+            if (fisierbinar.eof()) {
+                break; 
+            }
+
+            char* type = new char[typeSize];
+            fisierbinar.read(type, typeSize * sizeof(char));
+
+            int* ticketId = new int;
+            fisierbinar.read(reinterpret_cast<char*>(ticketId), sizeof(int));
+
+            double price;
+            fisierbinar.read(reinterpret_cast<char*>(&price), sizeof(double));
+
+          
+            Ticket ticket(type, ticketId, price);
+            ticket.printInfo();
+
+
+            delete[] type;
+            delete ticketId;
+        }
+
+        fisierbinar.close();
+    }
+    else {
+        cerr << "Error opening " << fileName << " for reading" << endl;
+    }
+}
 istream& operator>>(istream& f, Ticket& tic) {
     char* tm = new char[256];
     cout << "The type of the seat: ";
     f.ignore();
     getline(f, tic.type);
+
     cout << "Enter the price: ";
     f >> tic.price;
+
     cout << "the ticket ID: ";
     tic.generateTicketId();
-    cout << "The ticket ID: " << dec << *tic.getTicketId() << endl;
+
+    cout << "The ticket ID: "  << *tic.getTicketId() << endl;
     return f;
 }
 ostream& operator<<(ostream& g, Ticket tic) {
     g << "Ticket Information:" << endl;
     g << "Type: " << tic.type << endl;
-    g << "Price:" << tic.price<<endl; 
-    g << "Id:" << tic.ticketId<<endl;
+    g << "Price:" << tic.price << endl;
+    g << "Id:" << tic.ticketId << endl;
     g << "-----------------------------" << endl;
+
     return g;
 }
+
+/*int* Ticket::generateTicketId() { //it's wrong!!!!!!!!!!!!!!!
+    ifstream inputFile("Tickets.bin", ios::binary);
+
+    int maxId = 0;
+
+   
+    while (inputFile.read(reinterpret_cast<char*>(&maxId), sizeof(int))) {
+       
+        inputFile.seekg(sizeof(char) * maxId, ios::cur);
+        inputFile.seekg(sizeof(double), ios::cur);
+    }
+
+   
+    inputFile.close();
+
+
+    int* ticketId = new int(maxId + 1);
+
+    return ticketId;
+}*/
+
 void displayMenu() {
-    cout << "1. Display Event Location Info" << endl;
-    cout << "2. Display Event Info" << endl;
-    cout << "3. Display Ticket Info" << endl;
-    cout << "4. Save to File" << endl;
-    cout << "5. Load from File" << endl;
+    cout << "1. Display Event Location Info from file" << endl;
+    cout << "2. Display Event Info from file" << endl;
+    cout << "3. Display Ticket Info from file" << endl;
+    cout << "4. New Ticket" << endl;
+    cout << "5. Load from Binary File" << endl;
     cout << "6. Exit" << endl;
 }
+int* generateTicketId() {
+    int* ticketId = new int;
 
 
-void saveEventToFile(const char* fileName, const Event& event) {
-    ofstream outFile(fileName, ios::binary | ios::app);
-
-    if (!outFile.is_open()) {
-        cout << "Error opening file for writing." << endl;
-        return;
-    }
-
-     
-    event.saveToFile(outFile);
-
-    outFile.close();
+    static int counter = 0;
+    *ticketId = ++counter;
+    return ticketId;
 }
+Ticket readTicketFromConsole() {
+    string type;
+    double price;
 
-void loadEventFromFile(const char* fileName, Event& event) {
-    ifstream inFile(fileName, ios::binary);
+    cout << "Enter ticket type: ";
+    cin.ignore();  
+    getline(cin, type);
 
-    if (!inFile.is_open()) {
-        cout << "Error opening file for reading." << endl;
-        return;
-    }
+    cout << "Enter ticket price: ";
+    cin >> price;
 
+    int* ticketId = generateTicketId();
+
+    Ticket ticket(type,ticketId, price);
+   // ticket.setTicketId(ticketId);
     
-    event.loadFromFile(inFile);
-
-    inFile.close();
-}
-
-void saveTicketToFile(const char* fileName, const Ticket& ticket) {
-    ofstream outFile(fileName, ios::binary | ios::app);
-
-    if (!outFile.is_open()) {
-        cout << "Error opening file for writing." << endl;
-        return;
-    }
-
-    ticket.saveToFile(outFile);
-
-    outFile.close();
-}
-
-void loadTicketFromFile(const char* fileName, Ticket& ticket) {
-    ifstream inFile(fileName, ios::binary);
-
-    if (!inFile.is_open()) {
-        cout << "Error opening file for reading." << endl;
-        return;
-    }
-
     
-    ticket.loadFromFile(inFile);
+    return ticket;
 
-    inFile.close();
 }
+/* void deserializeTickets(const string& fileName, vector<Ticket>& tickets) {
+    ifstream inputFile(fileName, ios::binary);
+
+
+    if (!inputFile.is_open()) {
+        cerr << "Error opening " << fileName << " for reading" << endl;
+        return;
+    }
+
+    while (true) {
+
+        int typeSize;
+        if (!inputFile.read(reinterpret_cast<char*>(&typeSize), sizeof(int)))
+            break;
+
+        char* type = new char[typeSize];
+        if (!inputFile.read(type, typeSize * sizeof(char))) {
+            delete[] type;
+            break;
+        }
+
+
+        int* ticketId = new int;
+        if (!inputFile.read(reinterpret_cast<char*>(ticketId), sizeof(int))) {
+            delete[] type;
+            delete ticketId;
+            break;
+        }
+
+
+        double price;
+        if (!inputFile.read(reinterpret_cast<char*>(&price), sizeof(double))) {
+            delete[] type;
+            delete ticketId;
+            break;
+        }
+
+
+        Ticket ticket(type, ticketId, price);
+        tickets.push_back(ticket);
+
+        delete[] type;
+    }
+
+    inputFile.close();
+}*/
+
+
+void Ticket::saveToBinaryFile(const string& fileName) const {
+    ofstream outputFile(fileName, ios::app | ios::binary);
+
+    if (outputFile.is_open()) {
+        int nrCrt = static_cast<int>(type.size() + 1);
+        outputFile.write(reinterpret_cast<const char*>(&nrCrt), sizeof(int));
+        outputFile.write(type.c_str(), nrCrt * sizeof(char));
+
+
+        outputFile.write(reinterpret_cast<const char*>(ticketId), sizeof(int));
+
+        outputFile.write(reinterpret_cast<const char*>(&price), sizeof(double));
+
+        outputFile.close();
+
+
+        cout << "Ticket saved to " << fileName << endl;
+    }
+    else {
+        cerr << "Error opening " << fileName << " for writing" << endl;
+    }
+}
+
 
 int main() {
+    Ticket ticket;
+    ifstream fisierbinar("Tickets.bin", ios::binary);
     try {
-        const int seatsPerRow[] = { 10, 12, 10 };
-        EventLocation location(100, 3, seatsPerRow);
-
-        Event event("Concert", "19-11-2023", "19:30");
-        Ticket ticket;
-       
-
         int choice;
 
         do {
@@ -646,36 +872,135 @@ int main() {
             cin >> choice;
 
             switch (choice) {
-            case 1:
-                location.printInfo();
-                break;
-            case 2:
-                event.printInfo();
-                break;
-            case 3:
-                ticket.printInfo();
+            case 1: {
+                ifstream inputEveloc("EventLocation.txt", ios::in);
+                cout << "Event Location Information:" << endl;
+                if (inputEveloc.is_open()) {
+                    int MaxSeats;
+                    inputEveloc >> MaxSeats;
+
+                    int numRows;
+                    inputEveloc >> numRows;
+
+                    int* seatsPerRow = new int[numRows];
+                    for (int i = 0; i < numRows; i++)
+                        inputEveloc >> seatsPerRow[i];
+
+                    cout << endl;
+                    cout << "-----------------------------" << endl;
+
+                    EventLocation EveLoc(MaxSeats, numRows, seatsPerRow);
+                    cout << EveLoc;
+                    inputEveloc.close();
+                    delete[] seatsPerRow;
+                }
+                else {
+
+                    cout << endl << "File does not exist" << endl;
+                }
+            }
+                  break;
+            case 2: {
+
+                ifstream inputEve("Event.txt", ios::in);
+
+                cout << "Event Information:" << endl;
+                if (inputEve.is_open()) {
+
+                    char* name;
+                    char buffer2[100];
+                    inputEve.getline(buffer2, sizeof(buffer2));
+                    name = new char[strlen(buffer2) + 1];
+                    strcpy(name, buffer2);
+
+                    string date;
+                    char buffer[50];
+                    inputEve.getline(buffer, 50);
+                    date = string(buffer);
+                    string time;
+
+                    char buffer1[50];
+                    inputEve.getline(buffer1, 50);
+                    time = string(buffer1);
+
+                    cout << endl;
+                    cout << "-----------------------------" << endl;
+
+                    Event EveLoc(name, date, time);
+                    cout << EveLoc;
+                    inputEve.close();
+                    delete[] name;
+                }
+                else {
+
+                    cout << endl << "File does not exist" << endl;
+                }
+            }
+                  break;
+
+            case 3: {
+
+                ifstream inputTick("Ticket.txt", ios::in);
+
+                cout << "Ticket Information:" << endl;
+                if (inputTick.is_open()) {
+
+                    string type;
+                    char buffer[100];
+                    inputTick.getline(buffer, 100);
+                    type = string(buffer);
+
+                    int* ticketId = new int;
+                    inputTick >> *ticketId;
+
+                    double price;
+                    inputTick >> price;
+                    cout << endl;
+                    cout << "-----------------------------" << endl;
+
+                    Ticket Tick(type, ticketId, price);
+                    cout << Tick;
+                    inputTick.close();
+                    delete ticketId;
+                }
+
+                else {
+                    cout << endl << "File does not exist" << endl;
+                }
+            }
+                  break;
+
+            case 4: {
+                 ticket = readTicketFromConsole();
+                  
+                 
+                  cout << "New Ticket Created:" << endl;
+                
+                  ticket.saveToBinaryFile("Tickets.bin");
+                  ticket.printInfo();
+            }
                 break;
 
-            case 4:
-                saveEventToFile("data.bin", event);
-                saveTicketToFile("data.bin", ticket);
-                cout << "Data saved to file." << endl;
-                break;
             case 5:
-                loadEventFromFile("data.bin", event);
-                loadTicketFromFile("data.bin", ticket);
-                cout << "Data loaded from file." << endl;
+
+                printBinaryFile("Tickets.bin");
                 break;
+
             case 6:
                 cout << "Exiting the program." << endl;
                 break;
+
             default:
+
                 cout << "Invalid choice. Try again." << endl;
             }
             cin.ignore();
         } while (choice != 6);
+
     }
     catch (const exception& e) {
+
+        cout << "Error: " << e.what() << endl;
     }
 
     return 0;
