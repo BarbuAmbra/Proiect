@@ -1,0 +1,15 @@
+vip
+1
+90.0
+loja1
+2
+40.50
+regular
+3
+10.15
+standard
+4
+50.20
+zona2
+5
+20.00
